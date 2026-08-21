@@ -1,39 +1,8 @@
-(function(){
-'use strict';
-function showWorker(){
- try{
-  var home=document.getElementById('homeMain'),admin=document.querySelector('.admin'),worker=document.querySelector('.workerPanel');
-  if(home) home.style.display='none';
-  if(admin) admin.classList.remove('show');
-  if(worker) worker.classList.add('show');
-  if(typeof window.renderWorker==='function') window.renderWorker();
-  var wc=document.getElementById('workerContent');
-  if(wc && (!wc.innerHTML.trim() || /Worker Login Successful|Login completed/i.test(wc.innerText||'')) && typeof window.workerDashboard==='function') wc.innerHTML=window.workerDashboard();
- }catch(e){console.error('Gig India worker portal fix:',e)}
-}
-function showAdmin(){
- try{
-  var home=document.getElementById('homeMain'),worker=document.querySelector('.workerPanel'),admin=document.querySelector('.admin');
-  if(home) home.style.display='none';
-  if(worker) worker.classList.remove('show');
-  if(admin) admin.classList.add('show');
-  if(typeof window.renderAdmin==='function') window.renderAdmin();
- }catch(e){console.error('Gig India admin portal fix:',e)}
-}
-function boot(){
- var role=sessionStorage.getItem('gigIndiaRole');
- if(role==='worker'){
-  showWorker();
-  setTimeout(showWorker,300);
-  setTimeout(showWorker,1000);
- }
- if(role==='admin'){
-  showAdmin();
-  setTimeout(showAdmin,300);
-  setTimeout(showAdmin,1000);
- }
- window.gigIndiaOpenWorkerPortal=showWorker;
- window.gigIndiaOpenAdminPortal=showAdmin;
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
-})();
+(function(){'use strict';
+const U='https://pkofzvbdeljsksecbqzg.supabase.co',K='sb_publishable_oAYg9uDeIYVHQ829qTMTaQ_pXvhG2Kb';
+const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function state(){try{let r=await fetch(U+'/rest/v1/gig_india_state?id=eq.1',{headers:{apikey:K,Authorization:'Bearer '+K,Accept:'application/json'},cache:'no-store'});if(r.ok){let a=await r.json();return a[0]?.data||{}}}catch(e){}try{return JSON.parse(localStorage.getItem('gig_india_state')||'{}')}catch(e){return {}}}
+async function showWorker(){let d=await state(),wid=sessionStorage.getItem('gigIndiaWorkerId')||'';let w=(d.workers||[]).find(x=>String(x.id||x.workerId||x.mobile)===String(wid))||{};let home=document.getElementById('homeMain'),admin=document.querySelector('.admin'),app=document.querySelector('.workerPanel');if(home)home.style.display='none';if(admin)admin.classList.remove('show');if(app)app.classList.add('show');let c=document.getElementById('workerContent');if(!c)return;let tasks=(d.tasks||[]).filter(x=>String(x.workerId||x.assignedWorkerId||'')===String(w.id||w.workerId||w.mobile));let projects=(d.projects||[]).filter(x=>String(x.workerId||x.assignedWorkerId||'')===String(w.id||w.workerId||w.mobile));let hist=(d.taskHistory||[]).filter(x=>String(x.workerId||'')===String(w.id||w.workerId||w.mobile));c.innerHTML='<div class="wrap" style="padding:24px 22px 60px"><div class="profileCard"><h2>Worker Dashboard</h2><p>Welcome, <b>'+E(w.name||'Worker')+'</b></p><div class="cards"><div class="dashCard"><small>Tasks</small><strong>'+tasks.length+'</strong></div><div class="dashCard"><small>Projects</small><strong>'+projects.length+'</strong></div><div class="dashCard"><small>Completed</small><strong>'+hist.length+'</strong></div><div class="dashCard"><small>Wallet</small><strong>₹'+Number(w.wallet||w.walletBalance||0).toLocaleString('en-IN')+'</strong></div></div></div><div class="profileCard" style="margin-top:18px"><h2>My Tasks</h2>'+(tasks.map(x=>'<div class="taskBox"><h3>'+E(x.title||x.name||'Task')+'</h3><p>Client: '+E(x.client||x.clientName||'-')+' · Payment: ₹'+E(x.payment||x.amount||0)+'</p><p>Status: <span class="status">'+E(x.status||'Assigned')+'</span></p></div>').join('')||'<div class="empty">No assigned tasks.</div>')+'</div><div class="profileCard" style="margin-top:18px"><h2>My Projects</h2>'+(projects.map(x=>'<div class="taskBox"><h3>'+E(x.title||x.name||'Project')+'</h3><p>'+E(x.description||'')+'</p>'+(x.link?'<a class="taskLink" href="'+E(x.link)+'" target="_blank" rel="noopener">Open Project Link</a>':'')+'</div>').join('')||'<div class="empty">No projects assigned.</div>')+'</div><div class="profileCard" style="margin-top:18px"><h2>My Task History</h2>'+(hist.map(x=>'<div class="historyCard"><b>'+E(x.title||x.name||'Completed Task')+'</b><p>Payment: ₹'+E(x.payment||x.amount||0)+' · '+E(x.verifiedAt||x.completedAt||'')+'</p></div>').join('')||'<div class="empty">No completed tasks yet.</div>')+'</div><div class="profileCard" style="margin-top:18px"><h2>Worker ID Card</h2><p><b>Name:</b> '+E(w.name||'-')+'</p><p><b>Worker ID:</b> '+E(w.id||w.workerId||w.mobile||'-')+'</p><p><b>Mobile:</b> '+E(w.mobile||'-')+'</p><p><b>Post:</b> '+E(w.post||w.position||'Gig Worker')+'</p><button class="btn" onclick="window.print()">View / Print ID Card</button></div></div>';}
+function showAdmin(){let home=document.getElementById('homeMain'),worker=document.querySelector('.workerPanel'),admin=document.querySelector('.admin');if(home)home.style.display='none';if(worker)worker.classList.remove('show');if(admin)admin.classList.add('show');if(typeof window.renderAdmin==='function')window.renderAdmin();}
+function boot(){let r=sessionStorage.getItem('gigIndiaRole');if(r==='worker')showWorker();else if(r==='admin')showAdmin();window.gigIndiaOpenWorkerPortal=showWorker;window.gigIndiaOpenAdminPortal=showAdmin;}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();})();
