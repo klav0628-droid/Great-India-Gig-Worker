@@ -1,4 +1,4 @@
-name: Deploy Gig India to GitHub Pages
+name: Gig India - GitHub Pages
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "gig-india-pages"
   cancel-in-progress: true
 
 jobs:
@@ -23,12 +23,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Prepare site
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="./login-fix-final.js?v=20260821-final" defer></script>'
+          if 'login-fix-final.js' not in s:
+              s=s.replace('</body>', tag+'\n</body>')
+              p.write_text(s, encoding='utf-8')
+          PY
+          touch .nojekyll
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: "."
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
