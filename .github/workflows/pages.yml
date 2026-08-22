@@ -30,7 +30,7 @@ jobs:
           import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          files=[('login-fix-final.js','20260822-login5'),('portal-fix-final.js','20260822-portal5'),('portal-shell-final.js','20260822-shell1')]
+          files=[('login-fix-final.js','20260822-login6'),('portal-fix-final.js','20260822-portal6'),('portal-shell-final.js','20260822-shell2'),('portal-access-fix.js','20260822-access1')]
           for name,ver in files:
               s=re.sub(r'<script[^>]+src=["\']\./'+re.escape(name)+r'[^>]*></script>\s*','',s)
               s=s.replace('</body>',f'<script src="./{name}?v={ver}" defer></script>\n</body>')
