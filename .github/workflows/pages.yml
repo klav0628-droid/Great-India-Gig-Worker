@@ -18,15 +18,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Prepare login bridge
+      - name: Install direct login handler
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          tag='<script src="./login-bridge.js?v=9d8510a"></script>'
+          for tag in ['<script src="./login-bridge.js?v=9d8510a"></script>','<script src="./login-fix-final.js"></script>']:
+              s=s.replace(tag,'')
+          tag='<script src="./login-direct.js?v=17aa5209"></script>'
           if tag not in s:
-              s=s.replace('</body>', tag+'\n</body>')
+              s=s.replace('</body>',tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
           PY
       - uses: actions/configure-pages@v5
