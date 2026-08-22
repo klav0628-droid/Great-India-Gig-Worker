@@ -18,8 +18,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build clean site
-        run: cp clean.html index.html
+      - name: Prepare clean runtime
+        run: |
+          cp clean.html index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="./clean-runtime.js?v=final1"></script>'
+          if tag not in s:
+              s=s.replace('</body>', tag+'\n</body>')
+          p.write_text(s,encoding='utf-8')
+          PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
