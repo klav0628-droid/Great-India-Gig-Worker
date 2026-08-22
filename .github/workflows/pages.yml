@@ -18,15 +18,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install direct login handler
+      - name: Install final portal runtime
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          for tag in ['<script src="./login-bridge.js?v=9d8510a"></script>','<script src="./login-fix-final.js"></script>']:
+          for tag in ['<script src="./login-bridge.js?v=9d8510a"></script>','<script src="./login-fix-final.js"></script>','<script src="./login-direct.js?v=17aa5209"></script>','<script src="./clean-runtime.js"></script>']:
               s=s.replace(tag,'')
-          tag='<script src="./login-direct.js?v=17aa5209"></script>'
+          tag='<script src="./portal-final.js?v=0130fcab"></script>'
           if tag not in s:
               s=s.replace('</body>',tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
