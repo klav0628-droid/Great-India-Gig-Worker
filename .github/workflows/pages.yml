@@ -1,19 +1,15 @@
-name: Gig India - GitHub Pages
-
+name: Gig India Pages
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
-  group: "gig-india-pages"
+  group: gig-india-pages
   cancel-in-progress: true
-
 jobs:
   deploy:
     environment:
@@ -21,28 +17,13 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Prepare site
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          files=[('login-fix-final.js','20260822-login6'),('portal-fix-final.js','20260822-portal6'),('portal-shell-final.js','20260822-shell2'),('portal-access-fix.js','20260822-access1'),('stable-portal-final.js','20260822-stable1')]
-          for name,ver in files:
-              s=re.sub(r'<script[^>]+src=["\']\./'+re.escape(name)+r'[^>]*></script>\s*','',s)
-              s=s.replace('</body>',f'<script src="./{name}?v={ver}" defer></script>\n</body>')
-          p.write_text(s,encoding='utf-8')
-          PY
-          touch .nojekyll
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/checkout@v4
+      - name: Build clean site
+        run: cp clean.html index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
-          path: "."
+          path: .
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v5
