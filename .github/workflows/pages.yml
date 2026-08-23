@@ -18,17 +18,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install final portal runtime
+      - name: Install Gig India portal runtime
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          for tag in ['<script src="./login-bridge.js?v=9d8510a"></script>','<script src="./login-fix-final.js"></script>','<script src="./login-direct.js?v=17aa5209"></script>','<script src="./clean-runtime.js"></script>']:
-              s=s.replace(tag,'')
-          tag='<script src="./portal-final.js?v=0130fcab"></script>'
-          if tag not in s:
-              s=s.replace('</body>',tag+'\n</body>')
+          old=['<script src="./login-bridge.js?v=9d8510a"></script>','<script src="./login-fix-final.js"></script>','<script src="./login-direct.js?v=17aa5209"></script>','<script src="./clean-runtime.js"></script>','<script src="./portal-final.js?v=0130fcab"></script>']
+          for tag in old: s=s.replace(tag,'')
+          inject='<script src="./login-direct.js?v=latest"></script>\n<script src="./data-bridge.js?v=latest"></script>'
+          if './login-direct.js?v=latest' not in s: s=s.replace('</body>',inject+'\n</body>')
           p.write_text(s,encoding='utf-8')
           PY
       - uses: actions/configure-pages@v5
