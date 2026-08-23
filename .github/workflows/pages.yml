@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Prepare original Gig India application
+      - name: Prepare restored Gig India application
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -35,16 +35,10 @@ jobs:
           ]
           for tag in old:
               s=s.replace(tag,'')
-          s=s.replace("const SUPABASE_ANON_KEY='';", "const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrb2Z6dmJkZWxqc2tzZWNicXpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1Mjk5MDksImV4cCI6MjEwMjEwNTkwOX0.2iPB9Wd9mwlsAGwe1a6LJ_psVn8uVv7WNpThhqLaxbo';")
-          # The original app's REST calls did not send the public Supabase key.
-          # Add it to the existing cloud read/write/upload calls without changing UI/business logic.
-          s=s.replace("headers:{'Accept':'application/json'}", "headers:{'Accept':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}")
-          s=s.replace("headers:{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'}", "headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Prefer':'resolution=merge-duplicates'}")
-          s=s.replace("headers:{'Content-Type':file.type||'application/octet-stream','x-upsert':'true'}", "headers:{'Content-Type':file.type||'application/octet-stream','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'x-upsert':'true'}")
-          marker='<button class="btn primary" type="button" onclick="openWorkerSignup()">Join as Gig Worker</button>'
-          admin='<button class="btn dark" type="button" onclick="openLogin(\'admin\')">Admin Login</button>'
-          if admin not in s and marker in s:
-              s=s.replace(marker, admin+marker, 1)
+          marker='</body>'
+          tag='<script src="./compat.js?v=restored"></script>'
+          if tag not in s:
+              s=s.replace(marker,tag+marker)
           p.write_text(s,encoding='utf-8')
           PY
       - uses: actions/configure-pages@v5
