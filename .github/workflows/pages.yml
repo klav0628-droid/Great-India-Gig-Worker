@@ -36,9 +36,9 @@ jobs:
           for tag in old:
               s=s.replace(tag,'')
           marker='</body>'
-          tag='<script src="./compat.js?v=restored"></script>'
-          if tag not in s:
-              s=s.replace(marker,tag+marker)
+          for tag in ['<script src="./compat.js?v=restored"></script>','<script src="./idcard-fix.js?v=offer-photo-1"></script>']:
+              if tag not in s:
+                  s=s.replace(marker,tag+marker)
           p.write_text(s,encoding='utf-8')
           PY
       - uses: actions/configure-pages@v5
