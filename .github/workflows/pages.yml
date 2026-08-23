@@ -18,27 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build the original working Gig India application
-        run: |
-          cp Gig-India-CLOUD-SYNC-ALL-BUTTONS-WORKING.html index.html
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          old_profile="""function openWorkerProfileEdit(){const w=currentWorker();if(!w)return;openModal(`<h2>Edit Worker Profile</h2><input id=\"epn\" placeholder=\"Full name\" value=\"${esc(w.name)}\"><input id=\"epm\" placeholder=\"Mobile number\" value=\"${esc(w.mobile)}\"><input id=\"epe\" type=\"email\" placeholder=\"Email address\" value=\"${esc(w.email||'')}\"><input id=\"eps\" placeholder=\"Skills\" value=\"${esc(w.skills||'')}\"><input id=\"epl\" placeholder=\"Preferred location\" value=\"${esc(w.location||'')}\"><button type=\"button\" class=\"btn primary\" style=\"width:100%\" onclick=\"saveWorkerProfile()\">Save Profile</button>`)}
-          function saveWorkerProfile(){const w=currentWorker();if(!w)return;const n=$('epn').value.trim(),m=$('epm').value.trim();if(!n||!m){alert('Name and mobile are required.');return}if(workers.some(x=>x.mobile===m&&x.id!==w.id)){alert('That mobile number is already registered.');return}w.name=n;w.mobile=m;w.email=$('epe').value.trim();w.skills=$('eps').value.trim();w.location=$('epl').value.trim()||'India';setData('workers',workers);logActivity(w.id,w.name,'Profile updated','Worker profile details were updated.');closeModal();renderWorker();renderAdmin();alert('Profile updated successfully.');}"""
-          new_profile="""function openWorkerProfileEdit(){const w=currentWorker();if(!w)return;openModal(`<h2>Edit Worker Profile</h2><input id=\"epn\" placeholder=\"Full name\" value=\"${esc(w.name)}\"><input id=\"epm\" placeholder=\"Mobile number\" value=\"${esc(w.mobile)}\"><input id=\"epe\" type=\"email\" placeholder=\"Email address\" value=\"${esc(w.email||'')}\"><input id=\"eps\" placeholder=\"Skills\" value=\"${esc(w.skills||'')}\"><input id=\"epl\" placeholder=\"Preferred location\" value=\"${esc(w.location||'')}\"><label style=\"display:block;font-weight:700;margin:4px 0 6px\">Profile Photo</label><input id=\"epPhoto\" type=\"file\" accept=\"image/*\"><small style=\"display:block;color:#64748b;margin:-4px 0 12px\">Upload or change your worker photo (max 10 MB).</small><button type=\"button\" class=\"btn primary\" style=\"width:100%\" onclick=\"saveWorkerProfile()\">Save Profile</button>`)}
-          async function saveWorkerProfile(){const w=currentWorker();if(!w)return;const n=$('epn').value.trim(),m=$('epm').value.trim(),photo=$('epPhoto')?.files?.[0]||null;if(!n||!m){alert('Name and mobile are required.');return}if(workers.some(x=>x.mobile===m&&x.id!==w.id)){alert('That mobile number is already registered.');return}if(photo){if(!photo.type.startsWith('image/')){alert('Please select an image.');return}if(photo.size>10*1024*1024){alert('Photo must be 10 MB or smaller.');return}}try{w.name=n;w.mobile=m;w.email=$('epe').value.trim();w.skills=$('eps').value.trim();w.location=$('epl').value.trim()||'India';if(photo){const key='WORKER_PHOTO_'+w.id+'_'+Date.now();await saveTaskFile(key,photo);w.photoFileKey=key;w.photoFileName=photo.name}setData('workers',workers);logActivity(w.id,w.name,'Profile updated',photo?'Profile details and photo were updated.':'Worker profile details were updated.');closeModal();renderWorker();renderAdmin();alert(photo?'Profile and photo updated successfully.':'Profile updated successfully.')}catch(e){console.error(e);alert('Profile could not be saved. Please try again.')}}"""
-          if old_profile not in s:
-              raise SystemExit('Profile block not found in source application')
-          s=s.replace(old_profile,new_profile,1)
-          old_submit="if(!note){if(btn){btn.disabled=false;btn.textContent='Submit Task for Verification'}alert('Please enter task completion details.');return}"
-          new_submit="if(!note&&!img&&!pdf){if(btn){btn.disabled=false;btn.textContent='Submit Task for Verification'}alert('Please enter task details or upload a task image/PDF.');return}"
-          if old_submit not in s:
-              raise SystemExit('Task validation block not found in source application')
-          s=s.replace(old_submit,new_submit,1)
-          p.write_text(s,encoding='utf-8')
-          PY
+      - name: Build the working Gig India application
+        run: cp Gig-India-TASK-HISTORY-FORM-FIXED-GREAT-INDIA-TECHNOLOGY.html index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
