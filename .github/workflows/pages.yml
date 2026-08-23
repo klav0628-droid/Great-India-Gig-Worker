@@ -36,7 +36,7 @@ jobs:
           for tag in old:
               s=s.replace(tag,'')
           marker='</body>'
-          for tag in ['<script src="./compat.js?v=restored"></script>','<script src="./idcard-fix.js?v=offer-photo-1"></script>','<script src="./idcard-visible-fix.js?v=0820fa8"></script>','<script src="./idcard-final-fix.js?v=only-idcard-photo-offer"></script>']:
+          for tag in ['<script src="./compat.js?v=restored"></script>','<script src="./idcard-fix.js?v=offer-photo-1"></script>','<script src="./idcard-visible-fix.js?v=0820fa8"></script>','<script src="./idcard-final-fix.js?v=only-idcard-photo-offer"></script>','<script src="./task-input-fix.js?v=e4a9a79"></script>']:
               if tag not in s:
                   s=s.replace(marker,tag+marker)
           p.write_text(s,encoding='utf-8')
