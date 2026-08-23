@@ -1,0 +1,1 @@
+# Gig India release rules
