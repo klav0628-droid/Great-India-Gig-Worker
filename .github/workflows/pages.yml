@@ -24,8 +24,6 @@ jobs:
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          # Remove all experimental overlay runtimes. The original application
-          # already contains the complete Admin + Worker UI and business logic.
           old=[
             '<script src="./login-bridge.js?v=9d8510a"></script>',
             '<script src="./login-fix-final.js"></script>',
@@ -37,12 +35,12 @@ jobs:
           ]
           for tag in old:
               s=s.replace(tag,'')
-          # The original app was built with a blank anon key, which prevented
-          # cloud state from loading in a fresh browser. Inject the project's
-          # public Supabase anon key at build time.
           s=s.replace("const SUPABASE_ANON_KEY='';", "const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrb2Z6dmJkZWxqc2tzZWNicXpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1Mjk5MDksImV4cCI6MjEwMjEwNTkwOX0.2iPB9Wd9mwlsAGwe1a6LJ_psVn8uVv7WNpThhqLaxbo';")
-          # Add a real Admin Login button to the original header without
-          # changing its existing Worker/Admin portal implementation.
+          # The original app's REST calls did not send the public Supabase key.
+          # Add it to the existing cloud read/write/upload calls without changing UI/business logic.
+          s=s.replace("headers:{'Accept':'application/json'}", "headers:{'Accept':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}")
+          s=s.replace("headers:{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'}", "headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Prefer':'resolution=merge-duplicates'}")
+          s=s.replace("headers:{'Content-Type':file.type||'application/octet-stream','x-upsert':'true'}", "headers:{'Content-Type':file.type||'application/octet-stream','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'x-upsert':'true'}")
           marker='<button class="btn primary" type="button" onclick="openWorkerSignup()">Join as Gig Worker</button>'
           admin='<button class="btn dark" type="button" onclick="openLogin(\'admin\')">Admin Login</button>'
           if admin not in s and marker in s:
