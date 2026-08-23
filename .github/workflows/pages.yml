@@ -18,16 +18,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Gig India portal runtime
+      - name: Prepare original Gig India application
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          old=['<script src="./login-bridge.js?v=9d8510a"></script>','<script src="./login-fix-final.js"></script>','<script src="./login-direct.js?v=17aa5209"></script>','<script src="./clean-runtime.js"></script>','<script src="./portal-final.js?v=0130fcab"></script>']
-          for tag in old: s=s.replace(tag,'')
-          inject='<script src="./login-direct.js?v=latest"></script>\n<script src="./data-bridge.js?v=latest"></script>'
-          if './login-direct.js?v=latest' not in s: s=s.replace('</body>',inject+'\n</body>')
+          # Remove all experimental overlay runtimes. The original application
+          # already contains the complete Admin + Worker UI and business logic.
+          old=[
+            '<script src="./login-bridge.js?v=9d8510a"></script>',
+            '<script src="./login-fix-final.js"></script>',
+            '<script src="./login-direct.js?v=17aa5209"></script>',
+            '<script src="./login-direct.js?v=latest"></script>',
+            '<script src="./clean-runtime.js"></script>',
+            '<script src="./portal-final.js?v=0130fcab"></script>',
+            '<script src="./data-bridge.js?v=latest"></script>'
+          ]
+          for tag in old:
+              s=s.replace(tag,'')
+          # The original app was built with a blank anon key, which prevented
+          # cloud state from loading in a fresh browser. Inject the project's
+          # public Supabase anon key at build time.
+          s=s.replace("const SUPABASE_ANON_KEY='';", "const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrb2Z6dmJkZWxqc2tzZWNicXpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1Mjk5MDksImV4cCI6MjEwMjEwNTkwOX0.2iPB9Wd9mwlsAGwe1a6LJ_psVn8uVv7WNpThhqLaxbo';")
+          # Add a real Admin Login button to the original header without
+          # changing its existing Worker/Admin portal implementation.
+          marker='<button class="btn primary" type="button" onclick="openWorkerSignup()">Join as Gig Worker</button>'
+          admin='<button class="btn dark" type="button" onclick="openLogin(\'admin\')">Admin Login</button>'
+          if admin not in s and marker in s:
+              s=s.replace(marker, admin+marker, 1)
           p.write_text(s,encoding='utf-8')
           PY
       - uses: actions/configure-pages@v5
